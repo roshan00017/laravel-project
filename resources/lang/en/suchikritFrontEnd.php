@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'full_name_np' => 'Full Name [ In Nepali ]',
+    'full_name_en' => 'Full Name [ In English ]',
+    'user_name' => 'User Name',
+    'password' => 'Password',
+    'confirm_password' => 'Password',
+    'personal_information' => 'Personal Information',
+    'login_information' => 'Personal Information',
+    'account_confirmation' => 'Confirmation',
+    'otp_code' => 'Otp Code',
+    'congrats' => 'Congratulations',
+    'head_sub_title' => ',',
+    'maillinefirst' => 'Your profile has been successfully registered',
+    'maillinesecond' => 'in the e-office system.',
+    'maillinethird' => 'To maintain the confidentiality of your account,',
+    'maillinefourth' => 'please keep your login information secure.',
+    'maillinefifth' => 'Please activate your account by using the OTP code.',
+    'maillinesixth' => 'After that, you will be able to login.',
+    'maillineseventh' => 'To activate the account.',
+    'otp' => 'OTP Code :',
+    'loginid' => 'Login Id',
+    'click' => 'Click here',
+    'thankyou' => '- Thank You',
+    'title' => 'New Suchikrit User Registration',
+];

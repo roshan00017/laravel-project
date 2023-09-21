@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'page_title' => 'Employee',
+    'na_pa_ga_pa' => 'N.P/Ga.P.',
+    'select_na_ga' => 'Select N.P/Ga.P.',
+    'photo' => 'Photo',
+    'name' => 'Name',
+    'email' => 'Email',
+    'phone' => 'Phone',
+    'mobile' => 'Mobile',
+    'name' => 'First Name',
+    'middle_name' => 'Middle Name',
+    'last_name' => 'Last Name',
+    'date_of_birth_bs' => 'Date of Birth',
+    'date_of_birth_ad' => 'Date of Birth',
+    'current_branch' => 'Current Branch',
+    'select_current_branch' => '** Please select one - Current branch',
+    'current_position' => 'Current Position',
+    'select_current_position' => '** Please select one -Current Postion',
+    'ward' => 'Ward No.',
+    'english' => 'English',
+    'nepali' => 'Nepali',
+    'full_name' => 'Name',
+];

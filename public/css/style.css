@@ -1,0 +1,137 @@
+.backgroundLogin {
+  background-image: url(../images/newsmart.jpeg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  background: linear-gradient(to bottom left, #001f3f 100%);
+}
+
+.loginSystem {
+  font-size: 15px;
+  color: #0b58a2;
+}
+
+.loginTitle b {
+  text-align-all: center;
+  font-size: 18px;
+  text-align: center;
+  color: #9f191f;
+}
+
+.boxTopButton {
+  margin-right: 5px;
+}
+.boxButton {
+  margin-right: 45px;
+}
+.radio-button {
+  display: inline-block;
+  vertical-align: middle;
+  margin-top: 0;
+  padding: 0;
+  width: 25px;
+  height: 25px;
+  background: rgb(255, 255, 255);
+  border: none;
+  cursor: pointer;
+}
+.radio-button.checked {
+  background-position: -140px 0;
+}
+
+@font-face {
+  font-family: "Kalimati";
+  src: url("../fonts/Kalimati.ttf") format("truetype");
+  src: local("Kalimati"), url("../fonts/Kalimati.ttf") format("truetype");
+}
+
+.f-kalimati {
+  font-family: "Kalimati";
+}
+.f-arial {
+  font-family: "Helvetica";
+}
+.modal-header {
+  height: 54px;
+  margin-right: -1px !important;
+}
+.modal-content-radius {
+  border-radius: 36px !important;
+}
+
+.select2-selection {
+  border-radius: 1rem !important;
+  border: 2px solid #ced4da !important;
+}
+.select2-container--default .select2-search--dropdown .select2-search__field {
+  border-radius: 1rem !important;
+  border: 2px solid #ced4da !important;
+}
+.select2-container--default
+  .select2-selection--single
+  .select2-selection__arrow
+  b {
+  top: 64% !important;
+}
+
+.modal {
+  overflow: auto !important;
+}
+
+.th-header {
+  background-color: #004a99;
+  color: #fff;
+}
+.multiple-select-data-selection__choice {
+  background-color: #2260bf;
+}
+.required-field {
+  color: #ca4843 !important;
+}
+.f-close {
+  color: #fff !important;
+  font-size: 21px;
+}
+.blink {
+  animation: blink-animation 1s steps(5, start) infinite;
+  -webkit-animation: blink-animation 1s steps(5, start) infinite;
+}
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+@-webkit-keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+
+.navbar-badge {
+  padding: 2px 4px !important;
+  right: 0 !important;
+}
+
+#calendarTable td:hover {
+  background-color: rgba(0, 0, 0, 0.075);
+}
+
+.calendarHead {
+  background-color: rgba(0, 0, 0, 0.075);
+}
+
+.check-box {
+  display: inline-block;
+  vertical-align: middle;
+  margin-top: 0;
+  padding: 0;
+  width: 18px;
+  background: rgb(255, 255, 255);
+  border: none;
+  cursor: pointer;
+}

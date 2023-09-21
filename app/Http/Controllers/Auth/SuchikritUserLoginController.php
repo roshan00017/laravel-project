@@ -1,0 +1,281 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Models\EDMIS\SuchikritUser;
+use Exception;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
+
+class SuchikritUserLoginController extends Controller
+{
+    /*
+    |--------------------------------------------------------------------------
+    | Login Controller
+    |--------------------------------------------------------------------------
+    |
+    | This controller handles authenticating users for the application and
+    | redirecting them to your home screen. The controller uses a trait
+    | to conveniently provide its functionality to your applications.
+    |
+    */
+
+    use AuthenticatesUsers;
+
+    /**
+     * Where to redirect users after login.
+     */
+    protected string $redirectTo = '/userDashboard';
+
+    public function __construct()
+    {
+        $this->middleware('guest')->except('logout');
+        $this->middleware('guest:suUser')->except('logout');
+    }
+
+    /* check username or email */
+    public function checkIdentity(): JsonResponse
+    {
+        try {
+            $identity = Str::lower($_POST['identity']);
+            if (filter_var($identity, FILTER_VALIDATE_INT) == true) {
+                $fieldName = 'mobile_no';
+            } elseif (filter_var($identity, FILTER_VALIDATE_EMAIL) == true) {
+                $fieldName = 'email';
+            } else {
+                $fieldName = 'user_name';
+            }
+            request()->merge([$fieldName => $identity]);
+            $user = SuchikritUser::where($fieldName, $identity)->first();
+            $message = '';
+
+            if (is_null($user)) {
+                $message = trans('auth.username_or_email_does_not_exist');
+            }
+            if ($user) {
+                if ($user->block_status == true) {
+                    $message = trans('auth.authBlock');
+                } elseif ($user->status == false) {
+                    $message = trans('auth.authInactive');
+                }
+            }
+            if ($message) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                ]);
+            } else {
+                return response()->json([
+                    'success' => true,
+                ]);
+            }
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went to wrong',
+            ], 500);
+        }
+    }
+
+    /* Check user status (active or not) */
+    protected function credentials(Request $request): array
+    {
+        return array_merge($request->only($this->username(), 'password'), ['status' => '1']);
+    }
+
+    /* post login form data */
+    public function login(Request $request)
+    {
+        try {
+
+            //check form validation
+            $messages = [
+                'captcha.required' => trans('auth.login.captcha_required'),
+                'identity.required' => trans('auth.login.identity_required'),
+                'password.min' => trans('auth.login.password_min'),
+                'password.required' => trans('auth.login.password_required'),
+            ];
+            //check captcha validation
+            if (systemSetting() && systemSetting()->login_captcha_required == 1) {
+                $request->validate([
+                    'identity' => 'required|min:3|string',
+                    'password' => 'required|min:3|string',
+                    'captcha' => 'required|captcha',
+                ], $messages);
+            } else {
+                $request->validate([
+                    'identity' => 'required|string',
+                    'password' => 'required|min:6|string',
+                ], $messages);
+            }
+            //set remember me function
+            if ($request->rememberme === null) {
+                setcookie('login_email', $request->identity, 100);
+                setcookie('login_pass', $request->password, 100);
+            } else {
+                setcookie('login_email', $request->identity, time() + 60 * 60 * 24 * 100);
+                setcookie('login_pass', $request->password, time() + 60 * 60 * 24 * 100);
+            }
+            //default validation check
+            // $this->validateLogin($request);
+            $user = SuchikritUser::where($this->username(), $request->identity)->first();
+
+            session()->put('fiscal_year_code', currentFy()->code);
+            session()->put('fiscal_year_id', currentFy()->id);
+
+            if (isset($user)) {
+                if (! Hash::check($request->password, $user->password)) {
+                    $errors = [$this->username() => trans('auth.invalid_password')];
+
+                    return redirect()->back()
+                        ->withInput($request->only($this->username(), 'remember'))
+                        ->withErrors($errors);
+                }
+                if ($user->status == false) {
+                    $errors = [$this->username() => trans('auth.authInactive')];
+
+                    return redirect()->back()
+                        ->withInput($request->only($this->username(), 'remember'))
+                        ->withErrors($errors);
+                }
+
+            } else {
+                $errors = [$this->username() => trans('auth.authUnknown')];
+
+                return redirect()->back()
+                    ->withInput($request->only($this->username(), 'remember'))
+                    ->withErrors($errors);
+            }
+
+            // If the class is using the ThrottlesLogins trait, we can automatically throttle
+            // the login attempts for this application. We'll key this by the username and
+            // the IP address of the client making these requests into this application.
+            if ($this->hasTooManyLoginAttempts($request)) {
+                $this->fireLockoutEvent($request);
+
+                return $this->sendLockoutResponse($request);
+
+            }
+            if (Auth::guard('suUser')->attempt($request->only([$this->username(), 'password']))) {
+                return $this->sendLoginResponse($request);
+            }
+
+            // If the login attempt was unsuccessful we will increment the number of attempts
+            // to login and redirect the user back to the login form. Of course, when this
+            // user surpasses their maximum number of attempts they will get locked out.
+            $this->incrementLoginAttempts($request);
+
+            return $this->sendFailedLoginResponse($request);
+        } catch (Exception $e) {
+            Session::flash('server_error', Lang::get('message.commons.technicalError'));
+
+            return back();
+        }
+    }
+
+    /* redirect log out route  */
+    public function logout(Request $request): Redirector|Application|RedirectResponse
+    {
+        Auth::logout();
+
+        $request->session()->flush();
+
+        $request->session()->regenerate();
+        session()->flash('success', trans('auth.login.logout_message'));
+
+        return redirect(route('sulogin'));
+    }
+
+    /* load captcha   */
+    public function reloadCaptcha(): JsonResponse
+    {
+        return response()->json(['captcha' => captcha_img()]);
+    }
+
+    /* load login form*/
+    public function showLoginForm(): Factory|View|Application
+    {
+        /* load data for request */
+        //        $data['load_js'] = [
+        //            'js/check_data.min.js',
+        //        ];
+        $data['script_js'] = "$(function(){
+               $('.toggle-password').click(function () {
+
+                $(this).toggleClass('fa-eye fa-eye-slash');
+                var input = $($(this).attr('toggle'));
+                if (input.attr('type') == 'password') {
+                    input.attr('type', 'text');
+                } else {
+                    input.attr('type', 'password');
+                }
+            })
+          $('#loginForm').validate({
+                 rules: {
+                     identity: {
+                         required: true,
+                     },
+            
+                 },
+                 messages: {
+                     identity: {
+                         required: 'अंग्रेजी नाम  अनिवार्य छ ।',
+                     },
+            
+                 },
+                 errorElement: 'span',
+                 errorPlacement: function (error, element) {
+                     error.addClass('invalid-feedback');
+                     element.closest('.form-group').append(error);
+                 },
+                 highlight: function (element, errorClass, validClass) {
+                     $(element).addClass('is-invalid');
+                 },
+                 unhighlight: function (element, errorClass, validClass) {
+                     $(element).removeClass('is-invalid');
+                 }
+                });
+         })";
+
+        return view('auth.suchikritUser.login', $data);
+    }
+
+    public function username(): string
+    {
+        $identity = request()->get('identity');
+        if (filter_var($identity, FILTER_VALIDATE_INT) == true) {
+            $fieldName = 'mobile_no';
+        } elseif (filter_var($identity, FILTER_VALIDATE_EMAIL) == true) {
+            $fieldName = 'email';
+        } else {
+            $fieldName = 'user_name';
+        }
+        request()->merge([$fieldName => $identity]);
+
+        return $fieldName;
+    }
+
+    /**
+     * Attempt to log the user into the application.
+     *
+     * @return bool
+     */
+    protected function attemptLogin(Request $request)
+    {
+        return $this->guard()->attempt(
+            $this->credentials($request), $request->boolean('remember')
+        );
+    }
+}

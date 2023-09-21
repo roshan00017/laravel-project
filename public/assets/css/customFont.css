@@ -1,0 +1,14 @@
+body {
+    font-family: sans-serif;
+    /* font-family: "Kalimati"  !important;
+    src: url("../fonts/Kalimati.ttf") format("truetype"); */
+}
+.Kalimati_font {
+    font-family: "Kalimati";
+    src: url("../../fonts/Kalimati.ttf") format("truetype");
+}
+
+.tawk-text-center{
+    background-color: brown !important;
+    display: none !important;
+}

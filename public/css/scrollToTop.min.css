@@ -1,0 +1,1 @@
+.to-top{background:#1633a8;position:fixed;bottom:16px;right:32px;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#f0f1f5;text-decoration:none;opacity:0;pointer-events:none;transition:all .4s}.to-top:hover{background-color:#1836ad;color:#f0f1f5}.to-top.active{bottom:32px;pointer-events:auto;opacity:1}
